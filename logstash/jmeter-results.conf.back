@@ -1,0 +1,27 @@
+input {
+    file {
+        type => "tv2-play"
+        path => [ "/Users/maci/development/elasticsearch/stuff/results/test.csv" ]
+        start_position => "beginning"
+    }
+}
+filter {
+    if ([message] =~ "responseCode") {
+        drop { }
+    } else {
+        csv {
+            columns => [ "time", "elapsed", "label", "responseCode", "threadName", "success", "bytes", "grpThreads", "allThreads", "Latency", "SampleCount", "ErrorCount", "Hostname" ]
+        }
+    }
+}
+output {
+    stdout { codec => rubydebug }
+    elasticsearch {
+        hosts => "127.0.0.1"
+        index => "logstash-jmeter-results-%{+YYYY.MM.dd}"
+        template => "/Users/maci/development/elasticsearch/logstash/jmeter-mapping.json"
+        template_name => "jmeter"
+        user => "elastic"
+        password => "changeme"
+    }
+}
